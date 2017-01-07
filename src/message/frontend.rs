@@ -114,6 +114,10 @@ impl Message {
     pub fn password<T: Into<String>>(password: T) -> Self {
         Message::PasswordMessage { password: password.into() }
     }
+
+    pub fn query<T: Into<String>>(query: T) -> Self {
+        Message::Query { query: query.into() }
+    }
 }
 
 #[inline]
