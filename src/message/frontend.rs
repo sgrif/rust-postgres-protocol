@@ -111,7 +111,7 @@ impl Message {
         }
     }
 
-    fn password<T: Into<String>>(password: T) -> Self {
+    pub fn password<T: Into<String>>(password: T) -> Self {
         Message::PasswordMessage { password: password.into() }
     }
 }

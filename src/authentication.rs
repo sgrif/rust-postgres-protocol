@@ -8,10 +8,10 @@ use md5::Context;
 /// The resulting string should be sent back to the database in a
 /// `PasswordMessage` message.
 #[inline]
-pub fn md5_hash(username: &[u8], password: &[u8], salt: [u8; 4]) -> String {
+pub fn md5_hash(username: &str, password: &str, salt: [u8; 4]) -> String {
     let mut context = Context::new();
-    context.consume(password);
-    context.consume(username);
+    context.consume(password.as_bytes());
+    context.consume(username.as_bytes());
     let output = context.compute();
     context = Context::new();
     context.consume(output.to_hex().as_bytes());
