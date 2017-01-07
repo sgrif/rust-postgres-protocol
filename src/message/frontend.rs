@@ -8,13 +8,13 @@ use std::marker;
 
 use {Oid, FromUsize, IsNull, write_nullable};
 
-pub enum Message<'a> {
+pub enum Message {
     Bind {
-        portal: &'a str,
-        statement: &'a str,
-        formats: &'a [i16],
-        values: &'a [Option<Vec<u8>>],
-        result_formats: &'a [i16],
+        portal: String,
+        statement: String,
+        formats: Vec<i16>,
+        values: Vec<Option<Vec<u8>>>,
+        result_formats: Vec<i16>,
     },
     CancelRequest {
         process_id: i32,
@@ -22,37 +22,37 @@ pub enum Message<'a> {
     },
     Close {
         variant: u8,
-        name: &'a str,
+        name: String,
     },
     CopyData {
-        data: &'a [u8],
+        data: Vec<u8>,
     },
     CopyDone,
     CopyFail {
-        message: &'a str,
+        message: String,
     },
     Describe {
         variant: u8,
-        name: &'a str,
+        name: String,
     },
     Execute {
-        portal: &'a str,
+        portal: String,
         max_rows: i32,
     },
     Parse {
-        name: &'a str,
-        query: &'a str,
-        param_types: &'a [Oid],
+        name: String,
+        query: String,
+        param_types: Vec<Oid>,
     },
     PasswordMessage {
-        password: &'a str,
+        password: String,
     },
     Query {
-        query: &'a str,
+        query: String,
     },
     SslRequest,
     StartupMessage {
-        parameters: &'a [(String, String)],
+        parameters: Vec<(String, String)>,
     },
     Sync,
     Terminate,
@@ -60,18 +60,18 @@ pub enum Message<'a> {
     __ForExtensibility,
 }
 
-impl<'a> Message<'a> {
+impl Message {
     #[inline]
     pub fn serialize(&self, buf: &mut Vec<u8>) -> io::Result<()> {
         match *self {
-            Message::Bind { portal, statement, formats, values, result_formats } => {
-                let r = bind(portal,
-                             statement,
+            Message::Bind { ref portal, ref statement, ref formats, ref values, ref result_formats } => {
+                let r = bind(&*portal,
+                             &*statement,
                              formats.iter().cloned(),
                              values,
                              |v, buf| {
-                                 match *v {
-                                     Some(ref v) => {
+                                 match v.as_ref() {
+                                     Some(v) => {
                                          buf.extend_from_slice(v);
                                          Ok(IsNull::No)
                                      }
@@ -89,19 +89,19 @@ impl<'a> Message<'a> {
             Message::CancelRequest { process_id, secret_key } => {
                 Ok(cancel_request(process_id, secret_key, buf))
             }
-            Message::Close { variant, name } => close(variant, name, buf),
-            Message::CopyData { data } => copy_data(data, buf),
+            Message::Close { variant, ref name } => close(variant, &*name, buf),
+            Message::CopyData { ref data } => copy_data(&*data, buf),
             Message::CopyDone => Ok(copy_done(buf)),
-            Message::CopyFail { message } => copy_fail(message, buf),
-            Message::Describe { variant, name } => describe(variant, name, buf),
-            Message::Execute { portal, max_rows } => execute(portal, max_rows, buf),
-            Message::Parse { name, query, param_types } => {
-                parse(name, query, param_types.iter().cloned(), buf)
+            Message::CopyFail { ref message } => copy_fail(&*message, buf),
+            Message::Describe { variant, ref name } => describe(variant, &*name, buf),
+            Message::Execute { ref portal, max_rows } => execute(&*portal, max_rows, buf),
+            Message::Parse { ref name, ref query, ref param_types } => {
+                parse(&*name, &*query, param_types.iter().cloned(), buf)
             }
-            Message::PasswordMessage { password } => password_message(password, buf),
-            Message::Query { query: q } => query(q, buf),
+            Message::PasswordMessage { ref password } => password_message(&*password, buf),
+            Message::Query { query: ref q } => query(&*q, buf),
             Message::SslRequest => Ok(ssl_request(buf)),
-            Message::StartupMessage { parameters } => {
+            Message::StartupMessage { ref parameters } => {
                 startup_message(parameters.iter().map(|&(ref k, ref v)| (&**k, &**v)), buf)
             }
             Message::Sync => Ok(sync(buf)),

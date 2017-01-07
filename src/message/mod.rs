@@ -6,3 +6,6 @@
 
 pub mod backend;
 pub mod frontend;
+
+pub use self::backend::{ParseResult, Message as BackendMessage};
+pub use self::frontend::Message as FrontendMessage;

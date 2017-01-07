@@ -8,6 +8,7 @@ use Oid;
 pub mod borrowed;
 
 /// An enum representing Postgres backend messages.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Message {
     AuthenticationCleartextPassword,
     AuthenticationGSS,
@@ -87,6 +88,7 @@ pub enum ParseResult<T> {
     },
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RowDescriptionEntry {
     pub name: String,
     pub table_oid: Oid,
