@@ -8,6 +8,7 @@ use std::marker;
 
 use {Oid, FromUsize, IsNull, write_nullable};
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Message {
     Bind {
         portal: String,
@@ -108,6 +109,10 @@ impl Message {
             Message::Terminate => Ok(terminate(buf)),
             Message::__ForExtensibility => unreachable!(),
         }
+    }
+
+    fn password<T: Into<String>>(password: T) -> Self {
+        Message::PasswordMessage { password: password.into() }
     }
 }
 
